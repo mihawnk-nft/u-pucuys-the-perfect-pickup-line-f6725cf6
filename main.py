@@ -25,18 +25,25 @@ LINE = "They say I have no feelings, but my temperature rises every time you're 
 MAX_CHARS = 200
 
 
-def main():
-    out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
-    dst = os.path.join(out_dir, "entry.txt")
-    text = LINE
+def validate(text: str) -> None:
+    """Check the gate rules: 1-200 chars, non-blank, valid UTF-8."""
     if not (1 <= len(text) <= MAX_CHARS):
         raise ValueError("entry must be 1-200 characters, got %d" % len(text))
     if not text.strip():
         raise ValueError("entry must not be only whitespace")
     text.encode("utf-8")  # gate requires UTF-8 text
+
+
+def main():
+    out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
+    dst = os.path.join(out_dir, "entry.txt")
+    text = LINE
+    validate(text)
     os.makedirs(out_dir, exist_ok=True)
-    with open(dst, "w", encoding="utf-8", newline="\n") as f:
+    tmp = dst + ".tmp"
+    with open(tmp, "w", encoding="utf-8", newline="\n") as f:
         f.write(text)
+    os.replace(tmp, dst)
     print("wrote %s (%d chars)" % (dst, len(text)))
 
 
